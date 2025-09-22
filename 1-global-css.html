@@ -1,0 +1,153 @@
+<style>
+  /* Declare global colors */
+  :root {
+    --lx-color-1: #595c5c;
+    /* black-minus-1 */
+    --lx-color-2: #0e101a;
+    /* black */
+    --lx-color-18: #e6ffe6;
+    /* light-green-minus-1 */
+    --lx-color-22: #008000;
+    /* light-green */
+    --lx-color-13: #2dabab;
+    /* green-minus-1 */
+    --lx-color-3: #007a7a;
+    /* green */
+    --lx-color-4: #006262;
+    /* green-plus-1 */
+    --lx-color-5: #2551da;
+    /* blue */
+    --lx-color-6: #03289e;
+    /* blue-plus-1 */
+    --lx-color-7: #151a2d;
+    /* blue-gray */
+    --lx-color-8: #f5fafa;
+    /* light-aqua-minus-1 */
+    --lx-color-9: #e6f2f2;
+    /* light-aqua */
+    --lx-color-10: #d4e7e7;
+    /* light-aqua-plus-1 */
+    --lx-color-11: #ffffff;
+    /* white */
+    --lx-color-12: #f8f8f8;
+    /* light-gray */
+    --lx-color-19: #cbd5e1;
+    /* light-gray-plus-1 */
+    --lx-color-20: #999;
+    /* dark-gray */
+    --lx-color-14: #ffe6e6;
+    /* red-minus-2 */
+    --lx-color-15: #ff6969;
+    /* red-minus-1 */
+    --lx-color-16: #ff0000;
+    --lx-color-21: #ffaa00;
+    /* red */
+
+    /* Global font family */
+    --lx-font-family: "Inter", Sans-serif;
+
+    /* Global font sizes */
+    --lx-font-size-xs: 10px;
+    --lx-font-size-s: 12px;
+    --lx-font-size-m: 14px;
+    /* normal text */
+    --lx-font-size-l: 16px;
+    --lx-font-size-xl: 18px;
+    /* big button text */
+    --lx-font-size-2xl: 24px;
+    --lx-font-size-3xl: 32px;
+    /* heading 1 and heading 2 */
+
+    /* Global font weights */
+    --lx-font-weight-regular: 400;
+    /* Normal text weight */
+    --lx-font-weight-medium: 500;
+    /* Medium weight */
+    --lx-font-weight-semibold: 600;
+    /* Semi-bold */
+    --lx-font-weight-bold: 700;
+    /* Bold */
+    --lx-font-weight-extrabold: 800;
+    /* Extra bold */
+
+    /* Global border radius */
+    --lx-radius-xs: 5px;
+    --lx-radius-s: 8px;
+    --lx-radius-m: 10px;
+    --lx-radius-l: 12px;
+
+    /* Declare global box-shadow variables */
+    --lx-box-shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.05);
+    --lx-box-shadow-s: 0 2px 4px rgba(0, 0, 0, 0.1);
+    /* Small shadow */
+    --lx-box-shadow-m: 0 4px 8px rgba(0, 0, 0, 0.15);
+    /* Medium shadow */
+    --lx-box-shadow-l: 0 8px 16px rgba(0, 0, 0, 0.2);
+    /* Large shadow */
+  }
+
+  button {
+    cursor: pointer;
+  }
+
+  .lx-is-logged-in .lx-is-logged-in--hide {
+    display: none !important;
+  }
+
+  .lx-is-logged-in .lx-is-logged-in--show {
+    display: block !important;
+    max-height: 100% !important;
+    max-width: 100% !important;
+  }
+
+  .lx-is-logged-out .lx-is-logged-out--hide {
+    display: none !important;
+  }
+
+  .lx-is-logged-out .lx-is-logged-out--show {
+    display: block !important;
+    max-height: 100% !important;
+    max-width: 100% !important;
+  }
+
+  .lx-is-disabled {
+    opacity: 0.5 !important;
+    cursor: not-allowed !important;
+    pointer-events: none !important;
+  }
+
+  .lx-is-hidden {
+    /* display: none !important; */
+    opacity: 0 !important;
+    /* max-height: 0 !important; */
+    pointer-events: none !important;
+    margin: 0 !important;
+  }
+
+  .lx-is-removed {
+    display: none !important;
+    max-height: 0 !important;
+    max-width: 0 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+
+  .lx-is-readonly {
+    opacity: 0.7 !important;
+    pointer-events: none !important;
+    user-select: none !important;
+    cursor: default !important;
+  }
+
+  .lx-is-visible {
+    display: block !important;
+  }
+
+  .lx-is-invisible {
+    visibility: hidden;
+  }
+
+  body button {
+    outline: none !important;
+  }
+</style>
