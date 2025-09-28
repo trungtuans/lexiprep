@@ -1,0 +1,44 @@
+html:has(body.login.wp-core-ui) {
+    background: var(--lx-color-neutral-900) !important;
+}
+
+body.login.wp-core-ui {
+    background: linear-gradient(145deg, var(--lx-color-primary-300) -30%, var(--lx-color-neutral-900) 40%) !important;
+}
+
+body.login.wp-core-ui .notice {
+    border-radius: var(--lx-rounded-md);
+
+}
+
+body.login.wp-core-ui form {
+    border-radius: var(--lx-rounded-md);
+    border-color: unset !important;
+}
+
+body.login.wp-core-ui #wp-submit {
+    color: white !important;
+    background: var(--lx-color-primary-700);
+}
+
+body.login.wp-core-ui #wp-submit:hover {
+    color: white !important;
+    background: var(--lx-color-primary-900);
+}
+
+body.login.wp-core-ui #nav a,
+body.login.wp-core-ui #backtoblog a,
+body.login.wp-core-ui .privacy-policy-page-link a {
+    color: var(--lx-color-neutral-300);
+}
+
+body.login.wp-core-ui #nav a:hover,
+body.login.wp-core-ui #backtoblog a:hover,
+body.login.wp-core-ui .privacy-policy-page-link a:hover {
+    color: var(--lx-color-primary-300);
+}
+
+body.login.wp-core-ui .dashicons,
+.dashicons-before:before {
+    color: white !important;
+}
