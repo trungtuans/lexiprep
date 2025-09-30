@@ -1,0 +1,54 @@
+<?php
+/**
+ * Automatically save user's geolocation country to billing_country on registration
+ * Add this code to your theme's functions.php or a custom plugin
+ */
+
+add_action('user_register', 'save_geolocation_country_on_registration', 10, 1);
+
+function save_geolocation_country_on_registration($user_id) {
+    // Check if WooCommerce is active
+    if (!class_exists('WC_Geolocation')) {
+        return;
+    }
+    
+    // Get user's IP address
+    $user_ip = WC_Geolocation::get_ip_address();
+    
+    // Geolocate the IP address using MaxMind
+    $geo_data = WC_Geolocation::geolocate_ip($user_ip);
+    
+    // Get the country code
+    $country_code = isset($geo_data['country']) ? $geo_data['country'] : '';
+    
+    // Only save if we have a valid country code
+    if (!empty($country_code)) {
+        // Save billing country only if it doesn't already exist
+        $existing_billing_country = get_user_meta($user_id, 'billing_country', true);
+        if (empty($existing_billing_country)) {
+            update_user_meta($user_id, 'billing_country', $country_code);
+        }
+        
+        // Optional: Also save shipping country only if it doesn't already exist
+        $existing_shipping_country = get_user_meta($user_id, 'shipping_country', true);
+        if (empty($existing_shipping_country)) {
+            update_user_meta($user_id, 'shipping_country', $country_code);
+        }
+        
+        // Optional: Save state if available and doesn't already exist
+        if (isset($geo_data['state']) && !empty($geo_data['state'])) {
+            $existing_billing_state = get_user_meta($user_id, 'billing_state', true);
+            if (empty($existing_billing_state)) {
+                update_user_meta($user_id, 'billing_state', $geo_data['state']);
+            }
+            
+            $existing_shipping_state = get_user_meta($user_id, 'shipping_state', true);
+            if (empty($existing_shipping_state)) {
+                update_user_meta($user_id, 'shipping_state', $geo_data['state']);
+            }
+        }
+        
+        // Optional: Log for debugging (remove in production)
+        error_log("User {$user_id} registered with geolocation country: {$country_code}");
+    }
+}

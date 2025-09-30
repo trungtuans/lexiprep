@@ -1,0 +1,39 @@
+# ============================================================================
+# LEXIPREP URL REWRITING CONFIGURATION
+# Enhanced rewrite rules for spacetree -> lexiprep and proqyz -> lexiquiz masking
+# ============================================================================
+
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+    
+    # ========================================================================
+    # MAIN REWRITE RULES - HANDLE ALL FILE TYPES
+    # Handle all file types including fonts, images, CSS, JS, etc.
+    # These rules must come BEFORE any WordPress rules
+    # ========================================================================
+    
+    # Primary rule: Handle subfolder mapping (lexiquiz -> proqyz) + main folder (lexiprep -> spacetree)
+    RewriteRule ^wp-content/plugins/lexiprep/(.*)lexiquiz/(.*)$ /wp-content/plugins/spacetree/$1proqyz/$2 [L,QSA]
+    
+    # Fallback rule: Handle paths without subfolder mapping
+    RewriteRule ^wp-content/plugins/lexiprep/(.*)$ /wp-content/plugins/spacetree/$1 [L,QSA]
+    
+    # ========================================================================
+    # ALTERNATIVE RULES (BACKUP CONFIGURATION)
+    # Uncomment if the main rules above don't work as expected
+    # ========================================================================
+    # RewriteRule ^wp-content/plugins/lexiprep/(.*)/lexiquiz/(.*)$ /wp-content/plugins/spacetree/$1/proqyz/$2 [L,QSA]
+    # RewriteRule ^wp-content/plugins/lexiprep/(.*)$ /wp-content/plugins/spacetree/$1 [L,QSA]
+    
+    # ========================================================================
+    # SECURITY MEASURES (OPTIONAL)
+    # Prevent direct access to the actual directories
+    # ========================================================================
+    # RewriteRule ^wp-content/plugins/spacetree/ - [F]
+    
+</IfModule>
+
+# ============================================================================
+# WORDPRESS STANDARD RULES
+# Standard WordPress rules should be placed below this point
+# ============================================================================
