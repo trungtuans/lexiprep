@@ -40,3 +40,65 @@ function bbloomer_simplify_checkout_virtual($fields)
     }
     return $fields;
 }
+
+// Remove BACS and PPCP for customers in Vietnam
+add_filter(
+    "woocommerce_available_payment_gateways",
+    "remove_gateways_for_vietnam"
+);
+function remove_gateways_for_vietnam($available_gateways)
+{
+    // Only on the frontend checkout
+    if (is_admin() || !is_checkout()) {
+        return $available_gateways;
+    }
+
+    // Get the customer's country code
+    $country = WC()->customer->get_billing_country();
+
+    // Gateways to hide for Vietnam
+    $to_hide = ["bacs", "ppcp"];
+
+    if ("VN" === $country) {
+        foreach ($to_hide as $gateway_id) {
+            if (isset($available_gateways[$gateway_id])) {
+                unset($available_gateways[$gateway_id]);
+            }
+        }
+    }
+
+    return $available_gateways;
+}
+
+// Only allow “sepay” for customers in Vietnam
+add_filter(
+    "woocommerce_available_payment_gateways",
+    "restrict_sepay_to_vietnam"
+);
+function restrict_sepay_to_vietnam($available_gateways)
+{
+    // Bail out in admin or if we’re not on checkout
+    if (is_admin() || !is_checkout()) {
+        return $available_gateways;
+    }
+
+    // Get the customer's country (billing)
+    $country = WC()->customer->get_billing_country();
+
+    // If they're NOT in Vietnam, remove the sepay gateway
+    if ("VN" !== $country && isset($available_gateways["sepay"])) {
+        unset($available_gateways["sepay"]);
+    }
+
+    return $available_gateways;
+}
+
+add_filter('woocommerce_gateway_icon', 'add_bacs_icon', 10, 2);
+
+function add_bacs_icon($icon, $gateway_id) {
+    if ($gateway_id === 'bacs') {
+        $logo_url = 'https://ielts.lexiprep.com/wp-content/uploads/2025/10/stripe-x-buy-me-a-coffee.svg';
+        $icon = '<img src="' . esc_url($logo_url) . '" alt="BACS Logo" style="max-height: 25px; vertical-align: middle; margin-left: 10px;">';
+    }
+    return $icon;
+}
