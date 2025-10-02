@@ -40,5 +40,5 @@ body.login.wp-core-ui .privacy-policy-page-link a:hover {
 
 body.login.wp-core-ui .dashicons,
 .dashicons-before:before {
-    color: white !important;
+    color: var(--lx-color-neutral-700) !important;
 }

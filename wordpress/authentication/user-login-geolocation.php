@@ -15,6 +15,12 @@ function save_geolocation_country_on_login($user_login, $user) {
     // Get user ID
     $user_id = $user->ID;
     
+    // Check if billing country already exists - skip if it does
+    $existing_billing_country = get_user_meta($user_id, 'billing_country', true);
+    if (!empty($existing_billing_country)) {
+        return; // User already has a country set, don't override
+    }
+    
     // Get user's IP address
     $user_ip = WC_Geolocation::get_ip_address();
     
@@ -26,19 +32,16 @@ function save_geolocation_country_on_login($user_login, $user) {
     
     // Only save if we have a valid country code
     if (!empty($country_code)) {
-        // Save billing country only if it doesn't already exist
-        $existing_billing_country = get_user_meta($user_id, 'billing_country', true);
-        if (empty($existing_billing_country)) {
-            update_user_meta($user_id, 'billing_country', $country_code);
-        }
+        // Save billing country
+        update_user_meta($user_id, 'billing_country', $country_code);
         
-        // Optional: Also save shipping country only if it doesn't already exist
+        // Also save shipping country if it doesn't exist
         $existing_shipping_country = get_user_meta($user_id, 'shipping_country', true);
         if (empty($existing_shipping_country)) {
             update_user_meta($user_id, 'shipping_country', $country_code);
         }
         
-        // Optional: Save state if available and doesn't already exist
+        // Optional: Save state if available
         if (isset($geo_data['state']) && !empty($geo_data['state'])) {
             $existing_billing_state = get_user_meta($user_id, 'billing_state', true);
             if (empty($existing_billing_state)) {

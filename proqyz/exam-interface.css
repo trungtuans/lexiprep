@@ -1,4 +1,6 @@
-/* Exam detail page */
+/* ========================================
+   EXAM DETAIL PAGE STYLES - START
+   ======================================== */
 .exam-detail .test-hero {
   display: none !important;
 }
@@ -115,6 +117,14 @@ li.proqyz__course-page {
   padding-bottom: 0px !important;
 }
 
+/* ========================================
+   EXAM DETAIL PAGE STYLES - END
+   ======================================== */
+
+/* ========================================
+   TAKE TEST PAGE STYLES - START
+   ======================================== */
+
 /* Take test page */
 .realtest-header__bt-submit,
 .realtest-header__bt-fullmock-test-submit {
@@ -159,3 +169,7 @@ li.proqyz__course-page {
   width: 28px !important;
   height: 28px !;
 }
+
+/* ========================================
+   TAKE TEST PAGE STYLES - END
+   ======================================== */
