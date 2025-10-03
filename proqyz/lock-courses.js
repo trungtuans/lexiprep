@@ -4,9 +4,9 @@
 document.addEventListener("DOMContentLoaded", function() {
   // Check if body has premium role classes and exit if found
   const body = document.body;
-  if (body.classList.contains('role_pmpro_role_1') || 
-      body.classList.contains('role_pmpro_role_2') || 
-      body.classList.contains('role_pmpro_role_3')) {
+  if (body.classList.contains('role-pmpro_role_1') || 
+      body.classList.contains('role-pmpro_role_2') || 
+      body.classList.contains('role-pmpro_role_3')) {
     return; // Exit early for premium users
   }
 
