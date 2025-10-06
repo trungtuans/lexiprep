@@ -117,6 +117,26 @@ li.proqyz__course-page {
   padding-bottom: 0px !important;
 }
 
+.exam-detail .-orange.iot-gribt.btn-locked,
+.exam-detail .-green.iot-gribt.btn-locked,
+.exam-detail .-blue.iot-gribt.btn-locked,
+.exam-detail .-pink.iot-gribt.btn-locked {
+  background: var(--lx-color-neutral-900) !important;
+  color: var(--lx-color-accent-premium-300) !important;
+  opacity: 1 !important;
+  cursor: pointer !important;
+}
+
+.exam-detail .-orange.iot-gribt:hover.btn-locked,
+.exam-detail .-green.iot-gribt:hover.btn-locked,
+.exam-detail .-blue.iot-gribt:hover.btn-locked,
+.exam-detail .-pink.iot-gribt:hover.btn-locked {
+  background: var(--lx-color-neutral-900) !important;
+  color: var(--lx-color-primary-300) !important;
+  opacity: 1 !important;
+  cursor: pointer !important;
+}
+
 /* ========================================
    EXAM DETAIL PAGE STYLES - END
    ======================================== */
