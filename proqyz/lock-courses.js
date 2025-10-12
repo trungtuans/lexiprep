@@ -1,7 +1,13 @@
 // This should run after DOM document.addEventListener("DOMContentLoaded"
 // Run in all cases exept when body contains class: .role_pmpro_role_1 or .role_pmpro_role_2 or .role_pmpro_role_3
+// Exclude on pages that have urls containing "writing", allowing users to access writing courses freely
 
 document.addEventListener("DOMContentLoaded", function () {
+// Exit if URL contains "writing"
+  if (window.location.href.includes("writing")) {
+    return; // Exit early for writing courses
+  }
+
   // Check if body has premium role classes and exit if found
   const body = document.body;
   if (
