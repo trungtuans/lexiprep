@@ -1,0 +1,10 @@
+# Code refinement guidelines for maintaining clean, readable, and well-documented code
+
+[Refine Code]
+Review and refine the code following these guidelines:
+- Apply best practices for naming functions and variables
+- Fix grammar and spelling errors
+- Remove unnecessary comments for trivial operations
+- Add brief comments summarizing the file's purpose at the top
+- Add concise comments before functions and important sections for future developers
+- Maintain current logic without changing core functionality
