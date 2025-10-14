@@ -76,13 +76,13 @@
    */
   function modifyAIReply(replyText, appendText) {
     // Make sure MwaiAPI is available and supports addFilter
-    if (!window.MwaiAPI || typeof MwaiAPI.addFilter !== 'function') return;
+    if (!window.MwaiAPI || typeof MwaiAPI.addFilter !== "function") return;
 
     // Track if the modification has already been used once
     let used = false;
 
     // Add a filter to modify the AI reply
-    MwaiAPI.addFilter('ai.reply', function (reply, args) {
+    MwaiAPI.addFilter("ai.reply", function (reply, args) {
       // If already used once, skip modification for later replies
       if (used) return reply;
       used = true;
@@ -94,19 +94,63 @@
       if (replyText) finalReply = replyText;
 
       // If appendText is given, add it after the reply
-      if (appendText) finalReply += ' ' + appendText;
+      if (appendText) finalReply += " " + appendText;
 
       // Return the modified reply to display to the user
       return finalReply;
     });
   }
 
+  /**
+   * Control a chatbot instance with various actions.
+   * @param {string|null} chatbotId - Optional. The ID of the chatbot (if multiple exist on the page).
+   * @param {boolean} shouldOpen - Whether to open/show the chatbot if minimized.
+   * @param {string|null} messageText - Optional. Message to send to the chatbot.
+   * @param {boolean} sendImmediately - Whether to send the message immediately (true) or just prepare it (false).
+   * @param {boolean} shouldClear - Whether to clear the chat history.
+   * @param {boolean} isSystem - Whether the message is from the system (will be wrapped in system tags).
+   */
+  function controlChatbot(chatbotId, shouldOpen, messageText, sendImmediately, shouldClear, isSystem = false) {
+    // Check if MwaiAPI is available
+    if (!window.MwaiAPI || typeof MwaiAPI.getChatbot !== "function") {
+      console.warn("MwaiAPI is not available or doesn't support getChatbot");
+      return false;
+    }
+
+    try {
+      // Get the chatbot instance
+      let chatbot = MwaiAPI.getChatbot(chatbotId);
+      
+      // Validate chatbot instance
+      if (!chatbot) {
+        console.warn("Chatbot instance not found");
+        return false;
+      }
+
+      // Perform actions in logical order
+      if (shouldClear) chatbot.clear(); // Clear first if requested
+      if (shouldOpen) chatbot.open(); // Then open if needed
+      if (messageText) {
+        // Wrap system messages in special HTML tags
+        const finalMessage = isSystem 
+          ? `<p class="lexi-system">${messageText}</p>`
+          : messageText;
+        chatbot.ask(finalMessage, sendImmediately);
+      }
+      
+      return true;
+    } catch (error) {
+      console.error("Error controlling chatbot:", error);
+      return false;
+    }
+  }
+
+
   // Expose globally under a namespaced object
   if (typeof window !== "undefined") {
     window.lexi ??= {};
     window.lexi.htmlToMarkdown = htmlToMarkdown;
     window.lexi.modifyAIReply = modifyAIReply;
+    window.lexi.controlChatbot = controlChatbot;
   }
 })();
-
-

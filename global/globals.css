@@ -194,3 +194,7 @@
 .lx-invisible {
   visibility: hidden !important;
 }
+
+.mwai-reply.mwai-user:has(.lexi-system) {
+    display: none;
+}
