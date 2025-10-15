@@ -1,75 +1,277 @@
-/* Shimmer effect for the editor */
-.lexi-shimmer::before {
+<style>
+  /* Data-attribute driven effects */
+
+  /* Shimmer */
+  [data-effect~="shimmer"] {
+    position: relative;
+    overflow: hidden;
+  }
+
+  [data-effect~="shimmer"]::before {
     content: "";
     position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-
-    /* CSS custom properties for flexibility */
-    --shimmer-angle: var(--shimmer-direction, 0deg);
-    --shimmer-size: var(--shimmer-bg-size, 100% 200%);
-    --shimmer-start: var(--shimmer-start-pos, 0 200%);
-    --shimmer-end: var(--shimmer-end-pos, 0 -200%);
-
-    /* Gradient using custom properties */
-    background: linear-gradient(var(--shimmer-angle),
-            rgba(230, 242, 242, 0.3) 25%,
-            rgba(160, 220, 220, 0.3) 50%,
-            rgba(230, 242, 242, 0.3) 75%);
-
-    background-size: var(--shimmer-size);
+    inset: 0;
+    background: linear-gradient(
+      var(--shimmer-angle, 0deg),
+      rgba(230, 242, 242, 0.3) 25%,
+      rgba(160, 220, 220, 0.3) 50%,
+      rgba(230, 242, 242, 0.3) 75%
+    );
+    background-size: var(--shimmer-size, 100% 200%);
     animation: shimmer-overlay 1.5s infinite;
     border-radius: var(--lx-radius-xs);
     pointer-events: none;
     z-index: 1;
-}
+  }
 
-/* Vertical shimmer (default) */
-.lexi-shimmer--vertical {
-    --shimmer-direction: 0deg;
-    --shimmer-bg-size: 100% 200%;
-    --shimmer-start-pos: 0 200%;
-    --shimmer-end-pos: 0 -200%;
-}
+  /* Vertical (default) */
+  [data-effect~="shimmer"][data-direction="vertical"],
+  [data-effect~="shimmer"]:not([data-direction]) {
+    --shimmer-angle: 0deg;
+    --shimmer-size: 100% 200%;
+  }
 
-/* Horizontal shimmer */
-.lexi-shimmer--horizontal {
-    --shimmer-direction: 90deg;
-    --shimmer-bg-size: 200% 100%;
-    --shimmer-start-pos: 200% 0;
-    --shimmer-end-pos: -200% 0;
-}
+  /* Horizontal */
+  [data-effect~="shimmer"][data-direction="horizontal"] {
+    --shimmer-angle: 90deg;
+    --shimmer-size: 200% 100%;
+  }
 
-@keyframes shimmer-overlay {
+  @keyframes shimmer-overlay {
     0% {
-        background-position: var(--shimmer-start);
+      background-position: 0 200%;
     }
-
     100% {
-        background-position: var(--shimmer-end);
+      background-position: 0 -200%;
     }
-}
+  }
 
-/* Flashing border effect - flashes 2 times, no size change */
-.lexi-flash-border {
-    animation: flash-border 2s ease-in-out;
-    border: 3px solid transparent; /* fixed width to avoid layout shift */
-}
+  [data-effect~="shimmer"][data-direction="horizontal"]::before {
+    animation-name: shimmer-overlay-horizontal;
+  }
 
-@keyframes flash-border {
-    0%, 100% {
-        border-color: transparent;
-        box-shadow: none;
+  @keyframes shimmer-overlay-horizontal {
+    0% {
+      background-position: 200% 0;
     }
-    10%, 30% {
-        border-color: var(--lx-color-primary-500);
-        /* use token color; soft glow without size change */
-        box-shadow: 0 0 20px color-mix(in srgb, var(--lx-color-primary-500) 50%, transparent);
+    100% {
+      background-position: -200% 0;
     }
-    20%, 40% {
-        border-color: transparent;
-        box-shadow: none;
+  }
+
+  /* Flashing border */
+  [data-effect~="flash-border"] {
+    animation: flash-border 2s ease-in-out infinite;
+    border: 3px solid transparent;
+  }
+
+  @keyframes flash-border {
+    0%,
+    100% {
+      border-color: transparent;
+      box-shadow: none;
     }
-}
+    10%,
+    30% {
+      border-color: var(--lx-color-primary-500);
+      box-shadow: 0 0 20px
+        color-mix(in srgb, var(--lx-color-primary-500) 50%, transparent);
+    }
+    20%,
+    40% {
+      border-color: transparent;
+      box-shadow: none;
+    }
+  }
+
+  /* Fade-in slide effects */
+  [data-effect~="fade-in-slide"] {
+    opacity: 0;
+  }
+
+  /* Direction-specific animations */
+  [data-effect~="fade-in-slide"][data-direction="left-to-right"],
+  [data-effect~="fade-in-slide"]:not([data-direction]) {
+    animation: fade-in-slide-lr 0.6s ease-out forwards;
+  }
+
+  [data-effect~="fade-in-slide"][data-direction="right-to-left"] {
+    animation: fade-in-slide-rl 0.6s ease-out forwards;
+  }
+
+  [data-effect~="fade-in-slide"][data-direction="bottom-to-top"] {
+    animation: fade-in-slide-bt 0.6s ease-out forwards;
+  }
+
+  [data-effect~="fade-in-slide"][data-direction="top-to-bottom"] {
+    animation: fade-in-slide-tb 0.6s ease-out forwards;
+  }
+
+  /* Keyframes for left to right */
+  @keyframes fade-in-slide-lr {
+    0% {
+      opacity: 0;
+      transform: translateX(-30px);
+    }
+    100% {
+      opacity: 1;
+      transform: translateX(0);
+    }
+  }
+
+  /* Keyframes for right to left */
+  @keyframes fade-in-slide-rl {
+    0% {
+      opacity: 0;
+      transform: translateX(30px);
+    }
+    100% {
+      opacity: 1;
+      transform: translateX(0);
+    }
+  }
+
+  /* Keyframes for bottom to top */
+  @keyframes fade-in-slide-bt {
+    0% {
+      opacity: 0;
+      transform: translateY(30px);
+    }
+    100% {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  /* Keyframes for top to bottom */
+  @keyframes fade-in-slide-tb {
+    0% {
+      opacity: 0;
+      transform: translateY(-30px);
+    }
+    100% {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  /* Pulse effect */
+  [data-effect~="pulse"] {
+    animation: pulse-effect 1s infinite;
+  }
+  @keyframes pulse-effect {
+    0%,
+    100% {
+      transform: scale(1);
+    }
+    50% {
+      transform: scale(1.05);
+    }
+  }
+
+  /* Glow effect */
+  [data-effect~="glow"] {
+    animation: glow-effect 2s infinite;
+  }
+  @keyframes glow-effect {
+    0%,
+    100% {
+      box-shadow: 0 0 5px rgba(0, 123, 255, 0.3);
+    }
+    50% {
+      box-shadow: 0 0 20px rgba(0, 123, 255, 0.8);
+    }
+  }
+</style>
+
+<script>
+  (function () {
+    "use strict";
+
+    /**
+     * Toggle any CSS-driven effect using data attributes.
+     * - Effect names are space-separated tokens in data-effect.
+     * - Options are written as data-<key> attributes.
+     * @param {string} selector - CSS selector for target elements
+     * @param {string} effect - Effect name to toggle
+     * @param {boolean} on - Whether to turn effect on or off
+     * @param {Object} options - Options to apply as data attributes
+     * @param {number} duration - Optional duration in ms to auto-turn off effect
+     */
+    function toggleEffect(
+      selector,
+      effect,
+      on = true,
+      options = {},
+      duration = null
+    ) {
+      const elements = document.querySelectorAll(selector);
+      if (!elements.length) return;
+
+      elements.forEach((el) => {
+        const current = (el.getAttribute("data-effect") || "").trim();
+        const tokens = current ? current.split(/\s+/) : [];
+
+        if (on) {
+          const retriggerableEffects = [
+            "flash-border",
+            "pulse",
+            "glow",
+            "fade-in-slide",
+          ];
+          if (
+            retriggerableEffects.includes(effect) &&
+            tokens.includes(effect)
+          ) {
+            const tempTokens = tokens.filter((t) => t !== effect);
+            if (tempTokens.length)
+              el.setAttribute("data-effect", tempTokens.join(" "));
+            else el.removeAttribute("data-effect");
+
+            void el.offsetHeight; // Force reflow
+
+            tempTokens.push(effect);
+            el.setAttribute("data-effect", tempTokens.join(" "));
+          } else {
+            if (!tokens.includes(effect)) tokens.push(effect);
+            el.setAttribute("data-effect", tokens.join(" "));
+          }
+
+          for (const [k, v] of Object.entries(options)) {
+            el.setAttribute(`data-${k}`, v);
+          }
+
+          if (duration && duration > 0) {
+            setTimeout(() => {
+              toggleEffect(selector, effect, false, options);
+            }, duration);
+          }
+        } else {
+          const next = tokens.filter((t) => t !== effect);
+          if (next.length) el.setAttribute("data-effect", next.join(" "));
+          else el.removeAttribute("data-effect");
+
+          for (const k of Object.keys(options)) {
+            el.removeAttribute(`data-${k}`);
+          }
+        }
+      });
+    }
+
+    // Expose globally under a namespaced object
+    if (typeof window !== "undefined") {
+      window.lexi ??= {};
+      window.lexi.toggleEffect = toggleEffect;
+    }
+
+    // Examples:
+    // window.lexi.toggleEffect('#editor', 'shimmer', true, { direction: 'horizontal' });
+    // window.lexi.toggleEffect('.highlight', 'flash-border', true, {}, 2000); // auto-off after 2s
+    // window.lexi.toggleEffect('#card', 'glow', true, {}, 3000); // auto-off after 3s
+    // window.lexi.toggleEffect('#editor', 'shimmer', false);
+    // window.lexi.toggleEffect('.card', 'fade-in-slide', true, { direction: 'left-to-right' });
+    // window.lexi.toggleEffect('.modal', 'fade-in-slide', true, { direction: 'bottom-to-top' });
+    // window.lexi.toggleEffect('.sidebar', 'fade-in-slide', true, { direction: 'right-to-left' });
+    // window.lexi.toggleEffect('.header', 'fade-in-slide', true, { direction: 'top-to-bottom' });
+  })();
+</script>
