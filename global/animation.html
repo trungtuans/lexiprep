@@ -1,0 +1,75 @@
+/* Shimmer effect for the editor */
+.lexi-shimmer::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+
+    /* CSS custom properties for flexibility */
+    --shimmer-angle: var(--shimmer-direction, 0deg);
+    --shimmer-size: var(--shimmer-bg-size, 100% 200%);
+    --shimmer-start: var(--shimmer-start-pos, 0 200%);
+    --shimmer-end: var(--shimmer-end-pos, 0 -200%);
+
+    /* Gradient using custom properties */
+    background: linear-gradient(var(--shimmer-angle),
+            rgba(230, 242, 242, 0.3) 25%,
+            rgba(160, 220, 220, 0.3) 50%,
+            rgba(230, 242, 242, 0.3) 75%);
+
+    background-size: var(--shimmer-size);
+    animation: shimmer-overlay 1.5s infinite;
+    border-radius: var(--lx-radius-xs);
+    pointer-events: none;
+    z-index: 1;
+}
+
+/* Vertical shimmer (default) */
+.lexi-shimmer--vertical {
+    --shimmer-direction: 0deg;
+    --shimmer-bg-size: 100% 200%;
+    --shimmer-start-pos: 0 200%;
+    --shimmer-end-pos: 0 -200%;
+}
+
+/* Horizontal shimmer */
+.lexi-shimmer--horizontal {
+    --shimmer-direction: 90deg;
+    --shimmer-bg-size: 200% 100%;
+    --shimmer-start-pos: 200% 0;
+    --shimmer-end-pos: -200% 0;
+}
+
+@keyframes shimmer-overlay {
+    0% {
+        background-position: var(--shimmer-start);
+    }
+
+    100% {
+        background-position: var(--shimmer-end);
+    }
+}
+
+/* Flashing border effect - flashes 2 times, no size change */
+.lexi-flash-border {
+    animation: flash-border 2s ease-in-out;
+    border: 3px solid transparent; /* fixed width to avoid layout shift */
+}
+
+@keyframes flash-border {
+    0%, 100% {
+        border-color: transparent;
+        box-shadow: none;
+    }
+    10%, 30% {
+        border-color: var(--lx-color-primary-500);
+        /* use token color; soft glow without size change */
+        box-shadow: 0 0 20px color-mix(in srgb, var(--lx-color-primary-500) 50%, transparent);
+    }
+    20%, 40% {
+        border-color: transparent;
+        box-shadow: none;
+    }
+}

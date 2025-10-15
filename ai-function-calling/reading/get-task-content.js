@@ -87,6 +87,7 @@ function getTaskQuestions(cleanup = false) {
   return taskQuestions;
 }
 
+
 console.log(getTaskQuestions(true));
 
 // Retrieve the active part and question label from the palette.
