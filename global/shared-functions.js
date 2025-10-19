@@ -102,49 +102,352 @@
   }
 
   /**
-   * Control a chatbot instance with various actions.
-   * @param {string|null} chatbotId - Optional. The ID of the chatbot (if multiple exist on the page).
-   * @param {boolean} shouldOpen - Whether to open/show the chatbot if minimized.
-   * @param {string|null} messageText - Optional. Message to send to the chatbot.
-   * @param {boolean} sendImmediately - Whether to send the message immediately (true) or just prepare it (false).
-   * @param {boolean} shouldClear - Whether to clear the chat history.
-   * @param {boolean} isSystem - Whether the message is from the system (will be wrapped in system tags).
+   * Controls a chatbot instance.
+   * @param {string|null} chatbotId - Target chatbot ID; null selects the default bot.
+   * @param {boolean} shouldOpen - Open the chatbot UI if true.
+   * @param {string|null} messageText - Optional message to queue or send.
+   * @param {boolean} sendImmediately - Send the message right away when true.
+   * @param {boolean} shouldClear - Clear chat history before any other action when true.
+   * @param {boolean} isSystem - Wrap the message in system markup if true.
+   * @param {function|null} callback - Invoked with the chatbot reply when provided.
+   *
+   * Examples:
+   * controlChatbot(null, true, "Hello!", true, false);
+   * controlChatbot(null, true, "What is 2+2?", true, false, false, (reply) => console.log(reply));
+   * controlChatbot("my-bot", true, "System notification", true, false, true, (reply) => handleSystemReply(reply));
    */
-  function controlChatbot(chatbotId, shouldOpen, messageText, sendImmediately, shouldClear, isSystem = false) {
+  function controlChatbot(
+    chatbotId,
+    shouldOpen,
+    messageText,
+    sendImmediately,
+    shouldClear,
+    isSystem = false,
+    callback = null
+  ) {
     // Check if MwaiAPI is available
     if (!window.MwaiAPI || typeof MwaiAPI.getChatbot !== "function") {
-      console.warn("MwaiAPI is not available or doesn't support getChatbot");
       return false;
     }
 
-    try {
-      // Get the chatbot instance
-      let chatbot = MwaiAPI.getChatbot(chatbotId);
-      
-      // Validate chatbot instance
-      if (!chatbot) {
-        console.warn("Chatbot instance not found");
-        return false;
+    // Get the chatbot instance
+    let chatbot = MwaiAPI.getChatbot(chatbotId);
+
+    // Validate chatbot instance
+    if (!chatbot) {
+      return false;
+    }
+
+    // Set up response callback if provided
+    if (callback && typeof callback === "function" && messageText) {
+      // Helper function to process the chatbot's reply
+      const handleReply = (reply) => {
+        callback(reply); // Pass the reply to the callback
+        console.log("Chatbot response processed successfully");
+        return reply; // Return the reply unmodified
+      };
+
+      // Clear existing filters to ensure a fresh start for this interaction
+      if (MwaiAPI.filters) {
+        MwaiAPI.filters = {};
       }
 
-      // Perform actions in logical order
-      if (shouldClear) chatbot.clear(); // Clear first if requested
-      if (shouldOpen) chatbot.open(); // Then open if needed
-      if (messageText) {
-        // Wrap system messages in special HTML tags
-        const finalMessage = isSystem 
-          ? `<p class="lexi-system">${messageText}</p>`
-          : messageText;
+      // Add a filter to intercept and handle the chatbot's reply
+      MwaiAPI.addFilter("ai.reply", handleReply);
+    }
+
+    // Perform actions in logical order
+    if (shouldClear) chatbot.clear(); // Clear first if requested
+    if (shouldOpen) chatbot.open(); // Then open if needed
+    if (messageText) {
+      // Wrap system messages in special HTML tags
+      const finalMessage = isSystem
+        ? `<p class="lexi-system">${messageText}</p>`
+        : messageText;
+
+      // Add a small delay before sending to ensure filters are properly set
+      setTimeout(() => {
         chatbot.ask(finalMessage, sendImmediately);
-      }
-      
-      return true;
-    } catch (error) {
-      console.error("Error controlling chatbot:", error);
-      return false;
+      }, 100);
     }
+
+    return true;
   }
 
+  /*
+Name: highlightText
+Description: Highlights specified text terms in the document with optional tooltips and smooth scrolling to the first match. Can be used to highlight single or multiple terms. Avoids highlighting terms that are under 4 characters and avoids highlighting over 1 paragraph.
+Parameter:
+- searchData (object): Object with term-tooltip pairs. Usage example: highlightText([["term1", "tooltip1"], ["term2", "tooltip2"]]). Use "" for no tooltip/highlight only.
+- scopeSelector (string|null): Optional selector to limit the search area. Supports a single simple selector only: "#id", ".class", or "tag".
+*/
+  function highlightText(searchData, scopeSelector) {
+    console.log("highlightText called with:", searchData, scopeSelector);
+
+    const highlightClass = "lexi-text-highlight";
+    const highlightedElements = [];
+    const termTooltipMap = new Map();
+
+    // Resolve scope roots based on a simple selector (#id, .class, or tag). Defaults to [document.body].
+    function resolveScopeRoots(selector) {
+      if (typeof document === "undefined" || !document.body) return [];
+      if (!selector) return [document.body];
+
+      const sel = String(selector).trim();
+      if (!sel) return [document.body];
+
+      // Only allow a single simple selector: no spaces, commas, or combinators/attributes
+      if (/[,\s>+~\[]/.test(sel)) return [];
+
+      if (sel.startsWith("#")) {
+        const el = document.getElementById(sel.slice(1));
+        return el ? [el] : [];
+      }
+      if (sel.startsWith(".")) {
+        return Array.from(document.getElementsByClassName(sel.slice(1)));
+      }
+      // Treat as tag name
+      if (!/^[a-zA-Z][\w-]*$/.test(sel)) return [];
+      return Array.from(document.getElementsByTagName(sel));
+    }
+
+    // Normalize supported input formats into [{ term, tooltip }]
+    function parseSearchData(data) {
+      if (typeof data === "string") return [{ term: data, tooltip: undefined }];
+      if (Array.isArray(data)) {
+        return data.map((item) => {
+          if (typeof item === "string")
+            return { term: item, tooltip: undefined };
+          if (Array.isArray(item)) return { term: item[0], tooltip: item[1] };
+          if (item && typeof item === "object")
+            return { term: item.term, tooltip: item.tooltip };
+          return { term: String(item), tooltip: undefined };
+        });
+      }
+      if (data && typeof data === "object") {
+        return Object.entries(data).map(([term, tooltip]) => ({
+          term,
+          tooltip,
+        }));
+      }
+      return [];
+    }
+
+    // Replace existing highlights with plain text within scope roots; preserve existing tooltips by term
+    function clearPreviousHighlights(roots) {
+      const preserved = new Map();
+      const nodes = [];
+      roots.forEach((root) => {
+        nodes.push(...root.querySelectorAll(`.${highlightClass}`));
+      });
+      nodes.forEach((el) => {
+        const tip = el.getAttribute("data-tooltip-content");
+        const text = el.textContent || "";
+        if (tip) preserved.set(text.toLowerCase(), tip);
+        const parent = el.parentNode;
+        if (parent) {
+          parent.replaceChild(document.createTextNode(text), el);
+          parent.normalize();
+        }
+      });
+      return preserved;
+    }
+
+    // Collect text nodes within scope roots (exclude scripts/styles and existing highlights)
+    function getSearchableTextNodes(roots) {
+      const nodes = [];
+      roots.forEach((root) => {
+        const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT, {
+          acceptNode: (node) => {
+            const parent = node.parentElement;
+            if (!parent) return NodeFilter.FILTER_REJECT;
+            const tag = parent.tagName && parent.tagName.toLowerCase();
+            if (
+              tag &&
+              (tag === "script" || tag === "style" || tag === "noscript")
+            )
+              return NodeFilter.FILTER_REJECT;
+            if (parent.classList && parent.classList.contains(highlightClass))
+              return NodeFilter.FILTER_REJECT;
+            if (!node.textContent || !node.textContent.trim())
+              return NodeFilter.FILTER_REJECT;
+            return NodeFilter.FILTER_ACCEPT;
+          },
+        });
+        let n;
+        while ((n = walker.nextNode())) nodes.push(n);
+      });
+      return nodes;
+    }
+
+    // Exact search for a term across provided nodes
+    function findExactTextInNodes(searchText, textNodes) {
+      if (!searchText) return [];
+      const matches = [];
+      const lowerSearch = searchText.toLowerCase();
+      for (const node of textNodes) {
+        const text = node.textContent || "";
+        const lowerText = text.toLowerCase();
+        let index = lowerText.indexOf(lowerSearch);
+        while (index !== -1) {
+          matches.push({
+            node,
+            start: index,
+            end: index + searchText.length,
+            text: searchText,
+          });
+          index = lowerText.indexOf(lowerSearch, index + 1);
+        }
+      }
+      return matches;
+    }
+
+    // Fallback: progressively trim from end until any match is found
+    function findTextWithFallbackInNodes(originalText, textNodes) {
+      let searchText = (originalText || "").trim();
+      let matches = [];
+      while (searchText.length > 0) {
+        matches = findExactTextInNodes(searchText, textNodes);
+        if (matches.length > 0) break;
+        searchText = searchText.slice(0, -1);
+      }
+      return matches;
+    }
+
+    function scrollToElement(el) {
+      if (!el) return;
+      el.scrollIntoView({
+        behavior: "smooth",
+        block: "center",
+        inline: "nearest",
+      });
+    }
+
+    if (typeof document === "undefined" || !document.body) return false;
+
+    const scopeRoots = resolveScopeRoots(scopeSelector);
+    if (!scopeRoots || scopeRoots.length === 0) return false;
+
+    const termTooltipPairs = parseSearchData(searchData);
+
+    // Preserve tooltips from existing highlights in scope, then clear UI in scope
+    const preservedTooltips = clearPreviousHighlights(scopeRoots);
+
+    // Build tooltip map from input, then backfill with preserved ones
+    termTooltipPairs.forEach(({ term, tooltip }) => {
+      if (tooltip !== undefined)
+        termTooltipMap.set(String(term || "").toLowerCase(), tooltip);
+    });
+    preservedTooltips.forEach((tip, term) => {
+      if (!termTooltipMap.has(term)) termTooltipMap.set(term, tip);
+    });
+
+    const textNodes = getSearchableTextNodes(scopeRoots);
+    if (textNodes.length === 0 || termTooltipPairs.length === 0) return false;
+
+    // Gather matches for all terms
+    const allMatchesByNode = new Map();
+    for (const { term } of termTooltipPairs) {
+      const matches = findTextWithFallbackInNodes(term, textNodes);
+      for (const m of matches) {
+        m.originalTerm = term;
+        const arr = allMatchesByNode.get(m.node) || [];
+        arr.push(m);
+        allMatchesByNode.set(m.node, arr);
+      }
+    }
+
+    // Apply highlights per node; avoid overlapping spans
+    let firstCreated = null;
+    for (const node of textNodes) {
+      const nodeMatches = allMatchesByNode.get(node);
+      if (!nodeMatches || nodeMatches.length === 0) continue;
+
+      nodeMatches.sort(
+        (a, b) => a.start - b.start || b.end - b.start - (a.end - a.start)
+      );
+      const nonOverlapping = [];
+      let lastEnd = -1;
+      for (const m of nodeMatches) {
+        if (m.start >= lastEnd) {
+          nonOverlapping.push(m);
+          lastEnd = m.end;
+        }
+      }
+
+      const original = node.textContent || "";
+      const frag = document.createDocumentFragment();
+      let cursor = 0;
+
+      for (const m of nonOverlapping) {
+        if (m.start > cursor) {
+          frag.appendChild(
+            document.createTextNode(original.substring(cursor, m.start))
+          );
+        }
+        const span = document.createElement("span");
+        span.className = highlightClass;
+        span.textContent = original.substring(m.start, m.end);
+
+        const tip = termTooltipMap.get(
+          String(m.originalTerm || span.textContent).toLowerCase()
+        );
+        if (tip) span.setAttribute("data-tooltip-content", tip);
+
+        frag.appendChild(span);
+        highlightedElements.push(span);
+        if (!firstCreated) firstCreated = span;
+
+        cursor = m.end;
+      }
+      if (cursor < original.length) {
+        frag.appendChild(document.createTextNode(original.substring(cursor)));
+      }
+
+      if (node.parentNode) node.parentNode.replaceChild(frag, node);
+    }
+
+    if (
+      typeof window !== "undefined" &&
+      window.lexi &&
+      typeof window.lexi.toggleEffect === "function"
+    ) {
+      setTimeout(() => {
+        window.lexi.toggleEffect(`.${highlightClass}`, "text-highlight", true, {
+          direction: "left-to-right",
+        });
+      }, 300);
+    }
+
+    if (firstCreated) scrollToElement(firstCreated);
+
+    return highlightedElements.length > 0;
+  }
+
+  /*
+Example usage:
+- highlightText("search term");
+- highlightText(["term1", "term2"]);
+- highlightText([["term1", "tooltip1"], ["term2", "tooltip2"]]);
+- highlightText([{ term: "word", tooltip: "definition" }]);
+- highlightText({ term1: "tooltip1", term2: "tooltip2" });
+- highlightText("term", "#container"); // limit to element with id "container"
+- highlightText("term", ".section");   // limit to elements with class "section"
+- highlightText("term", "article");    // limit to all <article> elements
+*/
+
+  function clearTextHighlights() {
+    const highlightClass = "lexi-text-highlight";
+    const nodes = document.querySelectorAll(`.${highlightClass}`);
+    nodes.forEach((el) => {
+      const text = el.textContent || "";
+      const parent = el.parentNode;
+      if (parent) {
+        parent.replaceChild(document.createTextNode(text), el);
+        parent.normalize();
+      }
+    });
+  }
 
   // Expose globally under a namespaced object
   if (typeof window !== "undefined") {
@@ -152,5 +455,7 @@
     window.lexi.htmlToMarkdown = htmlToMarkdown;
     window.lexi.modifyAIReply = modifyAIReply;
     window.lexi.controlChatbot = controlChatbot;
+    window.lexi.highlightText = highlightText;
+    window.lexi.clearTextHighlights = clearTextHighlights;
   }
 })();

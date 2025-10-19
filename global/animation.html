@@ -73,9 +73,8 @@
     }
     10%,
     30% {
-      border-color: var(--lx-color-primary-500);
-      box-shadow: 0 0 20px
-        color-mix(in srgb, var(--lx-color-primary-500) 50%, transparent);
+      border-color: var(--lx-color-primary-700);
+      box-shadow: none;
     }
     20%,
     40% {
@@ -182,6 +181,50 @@
       box-shadow: 0 0 20px rgba(0, 123, 255, 0.8);
     }
   }
+
+  /* Text highlight effect
+     Updated: use animated background gradients so multi-line inline text is highlighted per line.
+     Works for single-line and multi-line without relying on ::before sizing quirks. */
+  [data-effect~="text-highlight"] {
+    /* no absolute overlay; paint directly as background */
+    padding: 0 6px;
+    background-image: linear-gradient(
+      var(--highlight-color, var(--lx-color-primary-300)),
+      var(--highlight-color, var(--lx-color-primary-300))
+    );
+    background-repeat: no-repeat;
+    /* start collapsed */
+    background-size: 0% 100%;
+    /* default direction: left -> right */
+    background-position: left center;
+    transition: background-size var(--highlight-duration, 0.5s) ease;
+    /* ensure background paints per line for multi-line inline content */
+    -webkit-box-decoration-break: clone;
+    box-decoration-break: clone;
+  }
+
+  /* Triggered state - shows the highlight */
+  [data-effect~="text-highlight"][data-state="active"] {
+    background-size: 100% 100%;
+  }
+
+  /* Direction variants */
+  [data-effect~="text-highlight"][data-direction="right-to-left"] {
+    background-position: right center;
+  }
+
+  /* Center-out uses two backgrounds that grow to 50% each */
+  [data-effect~="text-highlight"][data-direction="center-out"] {
+    background-image:
+      linear-gradient(var(--highlight-color, var(--lx-color-primary-300)), var(--highlight-color, var(--lx-color-primary-300))),
+      linear-gradient(var(--highlight-color, var(--lx-color-primary-300)), var(--highlight-color, var(--lx-color-primary-300)));
+    background-position: left center, right center;
+    background-repeat: no-repeat;
+    background-size: 0% 100%, 0% 100%;
+  }
+  [data-effect~="text-highlight"][data-direction="center-out"][data-state="active"] {
+    background-size: 50% 100%, 50% 100%;
+  }
 </style>
 
 <script>
@@ -218,6 +261,7 @@
             "pulse",
             "glow",
             "fade-in-slide",
+            "text-highlight",
           ];
           if (
             retriggerableEffects.includes(effect) &&
@@ -241,10 +285,23 @@
             el.setAttribute(`data-${k}`, v);
           }
 
+          /* Apply CSS var options for text-highlight so color/duration work */
+          if (effect === "text-highlight") {
+            if (options.color) el.style.setProperty("--highlight-color", options.color);
+            if (options.duration) el.style.setProperty("--highlight-duration", options.duration);
+          }
+
           if (duration && duration > 0) {
             setTimeout(() => {
               toggleEffect(selector, effect, false, options);
             }, duration);
+          }
+
+          // Special handling for text-highlight to trigger animation
+          if (effect === "text-highlight") {
+            setTimeout(() => {
+              el.setAttribute("data-state", "active");
+            }, 10);
           }
         } else {
           const next = tokens.filter((t) => t !== effect);
@@ -253,6 +310,13 @@
 
           for (const k of Object.keys(options)) {
             el.removeAttribute(`data-${k}`);
+          }
+
+          // Remove active state and cleanup vars for text-highlight
+          if (effect === "text-highlight") {
+            el.removeAttribute("data-state");
+            el.style.removeProperty("--highlight-color");
+            el.style.removeProperty("--highlight-duration");
           }
         }
       });
@@ -273,5 +337,8 @@
     // window.lexi.toggleEffect('.modal', 'fade-in-slide', true, { direction: 'bottom-to-top' });
     // window.lexi.toggleEffect('.sidebar', 'fade-in-slide', true, { direction: 'right-to-left' });
     // window.lexi.toggleEffect('.header', 'fade-in-slide', true, { direction: 'top-to-bottom' });
+    // window.lexi.toggleEffect('.highlight-text', 'text-highlight', true, { direction: 'left-to-right' });
+    // window.lexi.toggleEffect('mark', 'text-highlight', true, { color: '#ffeb3b', duration: '0.8s' });
+    // window.lexi.toggleEffect('.quote', 'text-highlight', true, { direction: 'right-to-left' });
   })();
 </script>
