@@ -3,7 +3,7 @@ add_action('wp_footer', function () {
     $url = $_SERVER['REQUEST_URI'];
 
     if (strpos($url, '/lexi-course/') !== false && strpos($url, '/ielts-listening/') !== false && strpos($url, '/result/') === false) {
-        echo do_shortcode('[mwai_chatbot id="251009"]');
+        echo do_shortcode('[mwai_chatbot id="251020"]');
     }
 });
 
@@ -19,7 +19,7 @@ add_action('wp_footer', function () {
     $url = $_SERVER['REQUEST_URI'];
 
     if (strpos($url, '/lexi-course/') !== false && strpos($url, '/ielts-writing/') !== false && strpos($url, '/result/') === false) {
-        echo do_shortcode('[mwai_chatbot id="251009"]');
+        echo do_shortcode('[mwai_chatbot id="251021"]');
     }
 });
 

@@ -30,7 +30,7 @@ const createAskAIButton = () => {
 
   askAIButton = document.createElement("button");
   askAIButton.innerHTML = `
-    <span class="material-symbols-rounded" style="font-size: 14px; margin-right: 4px;">psychology</span>
+    <span class="material-symbols-rounded" style="font-size: 14px; margin-right: 4px;">add_comment</span>
     Ask AI
   `;
   askAIButton.style.cssText = `

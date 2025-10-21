@@ -1288,7 +1288,7 @@ class Listening extends Questions{
                     const el = document.getElementById('session-details');
                     const sessionData = el ? JSON.parse(el.textContent || '{}') : {};
                     const transcript = Array.isArray(sessionData.transcript) ? sessionData.transcript : [];
-                    window.proqyzTranscript = transcript;
+                    window.lexiTranscript = transcript;
                     try { sessionStorage.setItem('listening_transcript', JSON.stringify(transcript)); } catch(_e) {}
                 } catch(e) {}
             })();

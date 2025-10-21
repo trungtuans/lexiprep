@@ -174,12 +174,12 @@
     return true;
   }
 
-  /*
+/*
 Name: highlightText
 Description: Highlights specified text terms in the document with optional tooltips and smooth scrolling to the first match. Can be used to highlight single or multiple terms. Avoids highlighting terms that are under 4 characters and avoids highlighting over 1 paragraph.
 Parameter:
 - searchData (object): Object with term-tooltip pairs. Usage example: highlightText([["term1", "tooltip1"], ["term2", "tooltip2"]]). Use "" for no tooltip/highlight only.
-- scopeSelector (string|null): Optional selector to limit the search area. Supports a single simple selector only: "#id", ".class", or "tag".
+- scopeSelector (string|null): Optional selector to limit the search area. Supports a single simple selector only: "#id", ".class", or "tag". For examaple highlightText("term", "#part-1") limits to element with id "part-1".
 */
   function highlightText(searchData, scopeSelector) {
     console.log("highlightText called with:", searchData, scopeSelector);
