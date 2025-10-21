@@ -22,7 +22,7 @@ function getTaskContent(section = null) {
     section = activePart || "all";
   }
   const taskPassage = getTaskPassage(section);
-  const taskQuestions = getTaskQuestions(false);
+  const taskQuestions = getTaskQuestions(false, section);
   const taskContent = `##Task Type: ${taskType}
 
 ##Passage:
@@ -151,12 +151,23 @@ Inform the user, in their preferred language, that you can now see the passage a
   }
 
   // Retrieve the question content from the split-two container.
-  function getTaskQuestions(cleanup = false) {
+  function getTaskQuestions(cleanup = false, section = null) {
     const container = document.getElementById("split-two");
     if (!container) {
       return null;
     }
-    const htmlContent = container.innerHTML.trim();
+    
+    let targetContainer = container;
+    
+    // If section is specified and not "all", target specific part questions
+    if (section && section !== "all") {
+      const partQuestionsContainer = container.querySelector(`#part-questions-${section}`);
+      if (partQuestionsContainer) {
+        targetContainer = partQuestionsContainer;
+      }
+    }
+    
+    const htmlContent = targetContainer.innerHTML.trim();
     if (!htmlContent) {
       return "";
     }
