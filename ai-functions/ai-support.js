@@ -59,18 +59,31 @@ document.addEventListener("DOMContentLoaded", () => {
   // Detect question number and send prompt to the chatbot (hint shortcut)
   document.querySelectorAll(".question__input").forEach((inputEl) => {
     inputEl.addEventListener("click", (event) => {
-      // Skip on /ielts-writing/ URLs
-      if (window.location.pathname.includes("/ielts-writing/")) {
-        return;
-      }
-
       const questionNum = inputEl.getAttribute("data-num");
       const questionHints =
         inputEl.getAttribute("data-hints") || "No hints available.";
       console.log("Clicked Question Input:", questionNum);
 
       const prompt = `Question ${questionNum}: Hints`;
-      window.lexi.controlChatbot(null, false, prompt, false, false);
+
+      // Send prompt to chatbot using a different method to avoid interupting user input
+      const textarea = document.querySelector(".mwai-input-text textarea");
+      if (textarea) {
+        // Check if the prompt is already in the textarea
+        if (textarea.value.trim() === prompt) {
+          return; // Do nothing if prompt is already there
+        }
+
+        // Use native setter so frameworks like React detect the change
+        const nativeSetter = Object.getOwnPropertyDescriptor(
+          window.HTMLTextAreaElement.prototype,
+          "value"
+        ).set;
+        nativeSetter.call(textarea, prompt);
+
+        // Trigger the event React/Vue listens for
+        textarea.dispatchEvent(new Event("input", { bubbles: true }));
+      }
 
       const chatInput = ".mwai-input";
       window.lexi.toggleEffect(

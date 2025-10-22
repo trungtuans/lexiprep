@@ -15,7 +15,12 @@ function getTaskContentListening(section = null) {
     return null;
   }
 
-  const activePart = getActivePart();
+  let activePart = getActivePart();
+  // Convert activePart to number
+  if (activePart !== null) {
+    activePart = Number(activePart);
+  }
+
   // Default to active part if section not provided
   if (section === undefined || section === null) {
     // If no active part, default to "all"
