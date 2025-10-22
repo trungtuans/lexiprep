@@ -66,7 +66,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
       const prompt = `Question ${questionNum}: Hints`;
 
-      // Send prompt to chatbot using a different method to avoid interupting user input
       const textarea = document.querySelector(".mwai-input-text textarea");
       if (textarea) {
         // Check if the prompt is already in the textarea
@@ -81,8 +80,8 @@ document.addEventListener("DOMContentLoaded", () => {
         ).set;
         nativeSetter.call(textarea, prompt);
 
-        // Trigger the event React/Vue listens for
-        textarea.dispatchEvent(new Event("input", { bubbles: true }));
+        // Store the event to trigger later, but don't trigger immediately
+        inputEl.pendingBubbleEvent = new Event("input", { bubbles: true });
       }
 
       const chatInput = ".mwai-input";
@@ -95,6 +94,15 @@ document.addEventListener("DOMContentLoaded", () => {
         },
         1000
       );
+    });
+
+    // Add blur event listener to trigger the bubble event when input loses focus
+    inputEl.addEventListener("blur", () => {
+      const textarea = document.querySelector(".mwai-input-text textarea");
+      if (textarea && inputEl.pendingBubbleEvent) {
+        textarea.dispatchEvent(inputEl.pendingBubbleEvent);
+        inputEl.pendingBubbleEvent = null; // Clear the pending event
+      }
     });
   });
 
