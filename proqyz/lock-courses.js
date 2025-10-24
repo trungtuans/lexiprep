@@ -3,7 +3,7 @@
 // Exclude on pages that have urls containing "writing", allowing users to access writing courses freely
 
 document.addEventListener("DOMContentLoaded", function () {
-// Exit if URL contains "writing"
+  // Exit if URL contains "writing"
   if (window.location.href.includes("writing")) {
     return; // Exit early for writing courses
   }
@@ -54,16 +54,36 @@ document.addEventListener("DOMContentLoaded", function () {
     // Modify buttons starting from skipCount
     practiceButtons.forEach((btn, index) => {
       if (index >= skipCount) {
-        // Modify href to appropriate pricing page
-        btn.setAttribute("href", pricingUrl);
+        // Remove any previous click listeners by cloning the node
+        const newBtn = btn.cloneNode(true);
+        btn.parentNode.replaceChild(newBtn, btn);
 
         // Add btn-locked class if not already present
-        if (!btn.classList.contains("btn-locked")) {
-          btn.classList.add("btn-locked");
+        if (!newBtn.classList.contains("btn-locked")) {
+          newBtn.classList.add("btn-locked");
         }
 
         // Change text to "Upgrade to Pro"
-        btn.textContent = "Upgrade to Pro";
+        newBtn.textContent = "Upgrade to Pro";
+
+        // Add click event to open Elementor popup and prevent default
+        newBtn.addEventListener("click", function (e) {
+          e.preventDefault();
+          if (
+            typeof elementorProFrontend !== "undefined" &&
+            elementorProFrontend.modules &&
+            elementorProFrontend.modules.popup
+          ) {
+            elementorProFrontend.modules.popup.showPopup({ id: 1039 });
+          } else {
+            // fallback: try triggering Elementor popup via jQuery if available
+            if (typeof jQuery !== "undefined") {
+              jQuery("body").trigger("elementor-pro/frontend/popup/show", [
+                1039,
+              ]);
+            }
+          }
+        });
       }
     });
   }
