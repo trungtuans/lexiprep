@@ -93,6 +93,7 @@ function restrict_sepay_to_vietnam($available_gateways)
     return $available_gateways;
 }
 
+// Add custom icon to BACS payment method
 add_filter('woocommerce_gateway_icon', 'add_bacs_icon', 10, 2);
 
 function add_bacs_icon($icon, $gateway_id) {
@@ -101,4 +102,69 @@ function add_bacs_icon($icon, $gateway_id) {
         $icon = '<img src="' . esc_url($logo_url) . '" alt="BACS Logo" style="max-height: 25px; vertical-align: middle; margin-left: 10px;">';
     }
     return $icon;
+}
+
+// Auto-fill email field with logged-in user's email and make it readonly
+add_action('woocommerce_checkout_init', 'auto_fill_checkout_email');
+function auto_fill_checkout_email($checkout) {
+    if (is_user_logged_in()) {
+        $current_user = wp_get_current_user();
+        $user_email = $current_user->user_email;
+        
+        // Set default value for billing email
+        $checkout->__set('billing_email', $user_email);
+    }
+}
+
+// Modify the email field to add tooltip and make it readonly
+add_filter('woocommerce_checkout_fields', 'modify_checkout_email_field');
+function modify_checkout_email_field($fields) {
+    if (is_user_logged_in()) {
+        $current_user = wp_get_current_user();
+        $user_email = $current_user->user_email;
+        
+        // Modify billing email field
+        $fields['billing']['billing_email']['default'] = $user_email;
+        // Set tooltip content based on URL language
+        $tooltip_content = (strpos($_SERVER['REQUEST_URI'], '/vi/') !== false) 
+            ? 'Email này được liên kết và cố định với tài khoản của bạn. Để nâng cấp cho email khác, vui lòng đăng xuất và đăng nhập bằng email đó.'
+            : 'This email is linked to your account and can\'t be changed. To upgrade with a different email, please log out and sign in using that email instead.';
+        
+        $fields['billing']['billing_email']['custom_attributes'] = array(
+            'readonly' => 'readonly',
+            'data-tooltip-content' => $tooltip_content
+        );
+    }
+    
+    return $fields;
+}
+
+// Add CSS to style the readonly field (optional)
+add_action('wp_head', 'checkout_email_readonly_styles');
+function checkout_email_readonly_styles() {
+    if (strpos($_SERVER['REQUEST_URI'], '/checkout/') !== false) {
+        ?>
+        <style>
+        input[readonly] {
+            background-color: #f9f9f9 !important;
+            cursor: not-allowed !important;
+            opacity: 0.7 !important;
+        }
+        </style>
+        <?php
+    }
+}
+
+// Validate that email hasn't been tampered with (security measure)
+add_action('woocommerce_checkout_process', 'validate_checkout_email_security');
+function validate_checkout_email_security() {
+    if (is_user_logged_in()) {
+        $current_user = wp_get_current_user();
+        $user_email = $current_user->user_email;
+        $submitted_email = $_POST['billing_email'];
+        
+        if ($submitted_email !== $user_email) {
+            wc_add_notice('Email address cannot be modified during checkout.', 'error');
+        }
+    }
 }

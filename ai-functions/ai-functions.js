@@ -4,7 +4,7 @@ Description: Retrieves the task content, including the transcript and questions,
 - section (string|number): The section (part) number to retrieve (e.g., "1", "2", "3", or "all"). If not provided or null, defaults to the currently active part. In most cases, use "null".
 */
 
-function getTaskContentListening(section = null) {
+function getTaskContentListening(section) {
   const chatbotId = null;
   // Clear any existing chatbot messages
   window.lexi.controlChatbot(chatbotId, false, null, false, true);
@@ -189,7 +189,7 @@ Description: Retrieves the task content, including the passage and questions, fo
 - section (string|number): The section (part) number to retrieve (e.g., "1", "2", "3", or "all"). If not provided or null, defaults to the currently active part. In most cases, use "null".
 */
 
-function getTaskContentReading(section = null) {
+function getTaskContentReading(section) {
   const chatbotId = null;
   // Clear any existing chatbot messages
   window.lexi.controlChatbot(chatbotId, false, null, false, true);
@@ -386,7 +386,7 @@ Description: Retrieves the task content for the active part or a specified part.
 - section (string|number): The section (part) number to retrieve (e.g., "1", "2", "3", or "all"). If not provided or null, defaults to the currently active part. In most cases, use "null".
 */
 
-function getTaskContentWriting(section = null) {
+function getTaskContentWriting(section) {
   const chatbotId = null;
   // Clear any existing chatbot messages
   window.lexi.controlChatbot(chatbotId, false, null, false, true);
@@ -675,7 +675,7 @@ Name: setPracticeMode
 Description: Activates practice mode with an optional timer. If minutes is null, activates unlimited practice mode. If minutes is specified, sets a timer for that duration.
 - minutes (string|number|null): Number of minutes for the timer (e.g., 5, 30, 99). If null, activates practice mode with no time limit.
 */
-function setPracticeMode(minutes = null) {
+function setPracticeMode(minutes) {
   // Set default config if not already set
   window.lexi = window.lexi || {};
   window.lexi.config = window.lexi.config || {
@@ -1007,10 +1007,12 @@ Name: highlightText
 Description: Highlights specified text terms in the document with optional tooltips and smooth scrolling to the first match. Can be used to highlight single or multiple terms. Avoids highlighting terms that are under 4 characters and avoids highlighting over 1 paragraph.
 Parameter:
 - searchData (object): Object with term-tooltip pairs. Usage example: highlightText([["term1", "tooltip1"], ["term2", "tooltip2"]]). Use "" for no tooltip/highlight only.
-- scopeSelector (string|null): Optional selector to limit the search area. Supports a single simple selector only: "#id", ".class", or "tag". For examaple highlightText("term", "#split-one") limits to element with id "split-one".
+- scopeSelector (string|null):
++ Optional selector to limit the search area. Supports a single simple selector only: "#id", ".class", or "tag". For examaple highlightText("term", "#split-one") limits to element with id "split-one".
++ Default value: "#split-one".
 */
 
-function highlightText(searchData, scopeSelector = "#split-one") {
+function highlightText(searchData, scopeSelector) {
   if (!window.lexi || typeof window.lexi.highlightText !== "function") {
     console.warn("Highlight function not available.");
     return;
