@@ -16,16 +16,6 @@ document.addEventListener("DOMContentLoaded", () => {
     }, 5000);
   }
 
-  // Disable Ctrl+F and Command+F
-  document.addEventListener("keydown", (event) => {
-    if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === "f") {
-      event.preventDefault();
-      alert(
-        "In real tests, the Ctrl+F / Command+F (Find) shortcut is disabled."
-      );
-    }
-  });
-
   // Set default config if not already set
   window.lexi = window.lexi || {};
   window.lexi.config = window.lexi.config || {
@@ -263,5 +253,15 @@ document.addEventListener("DOMContentLoaded", () => {
     if (chatbotContainer) {
       chatbotContainer.classList.add("lx-hidden");
     }
+
+    // Disable Ctrl+F and Command+F
+    document.addEventListener("keydown", (event) => {
+      if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === "f") {
+        event.preventDefault();
+        alert(
+          "In real tests, the Ctrl+F / Command+F (Find) shortcut is disabled."
+        );
+      }
+    });
   }
 });

@@ -1004,15 +1004,16 @@ function setPracticeMode(minutes) {
 
 /*
 Name: highlightText
-Description: Highlights specified text terms in the document with optional tooltips and smooth scrolling to the first match. Can be used to highlight single or multiple terms. Avoids highlighting terms that are under 4 characters and avoids highlighting over 1 paragraph.
+Description: Highlights specified text strings with optional tooltips and smooth scrolling to the first match. Can be used to highlight single or multiple text strings.
 Parameter:
-- searchData (object): Object with term-tooltip pairs. Usage example: highlightText([["term1", "tooltip1"], ["term2", "tooltip2"]]). Use "" for no tooltip/highlight only.
+- searchData (object): Object with text string-tooltip pairs. Usage example: highlightText([["term1", "tooltip1"], ["term2", "tooltip2"]]). Use "" for no tooltip/highlight only.
 - scopeSelector (string|null):
-+ Optional selector to limit the search area. Supports a single simple selector only: "#id", ".class", or "tag". For examaple highlightText("term", "#split-one") limits to element with id "split-one".
++ Optional selector to limit the search area. Supports a single simple selector only: "#id", ".class", or "tag".
 + Default value: "#split-one".
 */
 
 function highlightText(searchData, scopeSelector) {
+  if (!scopeSelector) scopeSelector = "#split-one";
   if (!window.lexi || typeof window.lexi.highlightText !== "function") {
     console.warn("Highlight function not available.");
     return;
