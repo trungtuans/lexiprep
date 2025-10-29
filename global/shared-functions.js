@@ -174,7 +174,7 @@
     return true;
   }
 
-/*
+  /*
 Name: highlightText
 Description: Highlights specified text terms in the document with optional tooltips and smooth scrolling to the first match. Can be used to highlight single or multiple terms. Avoids highlighting terms that are under 4 characters and avoids highlighting over 1 paragraph.
 Parameter:
@@ -183,7 +183,6 @@ Parameter:
 */
   function highlightText(searchData, scopeSelector) {
     console.log("highlightText called with:", searchData, scopeSelector);
-
     const highlightClass = "lexi-text-highlight";
     const highlightedElements = [];
     const termTooltipMap = new Map();
@@ -192,13 +191,10 @@ Parameter:
     function resolveScopeRoots(selector) {
       if (typeof document === "undefined" || !document.body) return [];
       if (!selector) return [document.body];
-
       const sel = String(selector).trim();
       if (!sel) return [document.body];
-
       // Only allow a single simple selector: no spaces, commas, or combinators/attributes
       if (/[,\s>+~\[]/.test(sel)) return [];
-
       if (sel.startsWith("#")) {
         const el = document.getElementById(sel.slice(1));
         return el ? [el] : [];
@@ -233,24 +229,33 @@ Parameter:
       return [];
     }
 
-    // Replace existing highlights with plain text within scope roots; preserve existing tooltips by term
-    function clearPreviousHighlights(roots) {
-      const preserved = new Map();
+    // Clear only highlights that match the current search terms
+    function clearMatchingHighlights(roots, currentTerms) {
       const nodes = [];
       roots.forEach((root) => {
         nodes.push(...root.querySelectorAll(`.${highlightClass}`));
       });
+
+      const currentTermsLower = currentTerms.map((t) => t.toLowerCase());
+
       nodes.forEach((el) => {
-        const tip = el.getAttribute("data-tooltip-content");
-        const text = el.textContent || "";
-        if (tip) preserved.set(text.toLowerCase(), tip);
-        const parent = el.parentNode;
-        if (parent) {
-          parent.replaceChild(document.createTextNode(text), el);
-          parent.normalize();
+        const text = (el.textContent || "").toLowerCase();
+        // Check if this highlight matches any of the current terms
+        const shouldClear = currentTermsLower.some(
+          (term) => text === term || text.includes(term) || term.includes(text)
+        );
+
+        if (shouldClear) {
+          const parent = el.parentNode;
+          if (parent) {
+            parent.replaceChild(
+              document.createTextNode(el.textContent || ""),
+              el
+            );
+            parent.normalize();
+          }
         }
       });
-      return preserved;
     }
 
     // Collect text nodes within scope roots (exclude scripts/styles and existing highlights)
@@ -324,22 +329,20 @@ Parameter:
     }
 
     if (typeof document === "undefined" || !document.body) return false;
-
     const scopeRoots = resolveScopeRoots(scopeSelector);
     if (!scopeRoots || scopeRoots.length === 0) return false;
-
     const termTooltipPairs = parseSearchData(searchData);
 
-    // Preserve tooltips from existing highlights in scope, then clear UI in scope
-    const preservedTooltips = clearPreviousHighlights(scopeRoots);
+    // Extract current terms
+    const currentTerms = termTooltipPairs.map(({ term }) => term);
 
-    // Build tooltip map from input, then backfill with preserved ones
+    // Clear only highlights that match current search terms
+    clearMatchingHighlights(scopeRoots, currentTerms);
+
+    // Build tooltip map from input
     termTooltipPairs.forEach(({ term, tooltip }) => {
       if (tooltip !== undefined)
         termTooltipMap.set(String(term || "").toLowerCase(), tooltip);
-    });
-    preservedTooltips.forEach((tip, term) => {
-      if (!termTooltipMap.has(term)) termTooltipMap.set(term, tip);
     });
 
     const textNodes = getSearchableTextNodes(scopeRoots);
@@ -362,7 +365,6 @@ Parameter:
     for (const node of textNodes) {
       const nodeMatches = allMatchesByNode.get(node);
       if (!nodeMatches || nodeMatches.length === 0) continue;
-
       nodeMatches.sort(
         (a, b) => a.start - b.start || b.end - b.start - (a.end - a.start)
       );
@@ -374,11 +376,9 @@ Parameter:
           lastEnd = m.end;
         }
       }
-
       const original = node.textContent || "";
       const frag = document.createDocumentFragment();
       let cursor = 0;
-
       for (const m of nonOverlapping) {
         if (m.start > cursor) {
           frag.appendChild(
@@ -388,22 +388,18 @@ Parameter:
         const span = document.createElement("span");
         span.className = highlightClass;
         span.textContent = original.substring(m.start, m.end);
-
         const tip = termTooltipMap.get(
           String(m.originalTerm || span.textContent).toLowerCase()
         );
         if (tip) span.setAttribute("data-tooltip-content", tip);
-
         frag.appendChild(span);
         highlightedElements.push(span);
         if (!firstCreated) firstCreated = span;
-
         cursor = m.end;
       }
       if (cursor < original.length) {
         frag.appendChild(document.createTextNode(original.substring(cursor)));
       }
-
       if (node.parentNode) node.parentNode.replaceChild(frag, node);
     }
 
@@ -420,7 +416,6 @@ Parameter:
     }
 
     if (firstCreated) scrollToElement(firstCreated);
-
     return highlightedElements.length > 0;
   }
 
