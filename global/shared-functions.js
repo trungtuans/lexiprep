@@ -6,6 +6,17 @@
     const turndownService = new TurndownService();
     let markdown = turndownService.turndown(htmlString);
 
+    // For inline image src such as data URIs, keep only the basic data such as "image/png;base64,..."
+    markdown = markdown.replace(
+      /!\[([^\]]*)\]\(data:([^)]+)\)/g,
+      (match, altText, dataPart) => {
+        const commaIndex = dataPart.indexOf(",");
+        if (commaIndex !== -1) {
+          return `![${altText}](data:${dataPart.slice(0, commaIndex + 1)}...)`;
+        }
+        return match;
+      }
+    );
     if (cleanup) {
       // Remove markdown links: transform [text](url) to just text.
       markdown = markdown.replace(/\[([^\]]+)\]\([^)]+\)/g, "$1");

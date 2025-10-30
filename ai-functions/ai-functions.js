@@ -163,7 +163,16 @@ Inform the user, in their preferred language, that you can now see the audio tra
       }
     }
 
-    const htmlContent = targetContainer.innerHTML.trim();
+    // --- Wrap all .qp-item text content in () ---
+    // Clone to avoid modifying DOM
+    const tempDiv = document.createElement("div");
+    tempDiv.innerHTML = targetContainer.innerHTML.trim();
+
+    tempDiv.querySelectorAll(".qp-item").forEach((el) => {
+      el.textContent = `((${el.textContent.trim()}))`;
+    });
+
+    const htmlContent = tempDiv.innerHTML.trim();
     if (!htmlContent) {
       return "";
     }
@@ -360,7 +369,16 @@ Inform the user, in their preferred language, that you can now see the passage a
       }
     }
 
-    const htmlContent = targetContainer.innerHTML.trim();
+    // --- Wrap all .qp-item text content in () ---
+    // Clone to avoid modifying DOM
+    const tempDiv = document.createElement("div");
+    tempDiv.innerHTML = targetContainer.innerHTML.trim();
+
+    tempDiv.querySelectorAll(".qp-item").forEach((el) => {
+      el.textContent = `(Q${el.textContent.trim()})`;
+    });
+
+    const htmlContent = tempDiv.innerHTML.trim();
     if (!htmlContent) {
       return "";
     }
