@@ -41,32 +41,61 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // If mode is "practice"
     let currentPart = null;
-    // Dectect user move between parts and inform the chatbot to get new task content
+
+    // Retrieve the active part
+    function getActivePart() {
+      const activePartEl = document.querySelector(
+        ".question-palette__part.-active"
+      );
+      const part =
+        activePartEl?.dataset.part ?? activePartEl?.getAttribute("data-part");
+      console.log("Active Part:", part);
+      return part;
+    }
+
+    // Detect user move between parts and inform the chatbot to get new task content
+    function handlePartChange() {
+      // Skip in simulation mode - AI support is disabled during test simulation
+      const mode = window.lexi.config.testMode.type;
+      if (mode === "simulation") {
+        return;
+      }
+
+      const part = getActivePart();
+
+      // Skip if clicking the same part
+      if (currentPart === part) {
+        return;
+      }
+      currentPart = part;
+      console.log("Detected Part Change:", part);
+
+      const prompt = `[System] Practice mode is on. Inform the user, in their preferred language, that you see they have switched to Part ${part}. Due to memory limitations, you need to clear the current conversation and retrieve the passage and questions for Part ${part} to save space. Ask for confirmation. If confirmed, run the function to retrieve the task content.`;
+      window.lexi.controlChatbot(null, false, prompt, true, false, true);
+    }
+
+    // Listen for clicks on .question-palette__part
     document.querySelectorAll(".question-palette__part").forEach((partEl) => {
       setTimeout(() => {
         partEl.addEventListener("click", (event) => {
-          // Skip in simulation mode - AI support is disabled during test simulation
-          const mode = window.lexi.config.testMode.type;
-          if (mode === "simulation") {
-            return;
-          }
-
           // Exclude clicks on .question-palette__items-group
           if (event.target.closest(".question-palette__items-group")) {
             return;
           }
+          setTimeout(() => {
+            handlePartChange();
+          }, 500);
+        });
+      }, 5000);
+    });
 
-          const part = partEl.getAttribute("data-part");
-
-          // Skip if clicking the same part
-          if (currentPart === part) {
-            return;
-          }
-          currentPart = part;
-          console.log("Clicked Part:", part);
-
-          const prompt = `[System] Practice mode is on. Inform the user, in their preferred language, that you see they have switched to Part ${part}. Due to memory limitations, you need to clear the current conversation and retrieve the passage and questions for Part ${part} to save space. Ask for confirmation. If confirmed, run the function to retrieve the task content.`;
-          window.lexi.controlChatbot(null, false, prompt, true, false, true);
+    // Listen for clicks on .test-panel__nav-btn
+    document.querySelectorAll(".test-panel__nav-btn").forEach((navBtn) => {
+      setTimeout(() => {
+        navBtn.addEventListener("click", () => {
+          setTimeout(() => {
+            handlePartChange();
+          }, 500);
         });
       }, 5000);
     });
